@@ -16,7 +16,7 @@
 /hooks
 /index.*
 /core.*
-/bin
+# /bin — committed on this fork so `npm install git+…` works without a build step.
 /cjs
 /esm
 /dist
