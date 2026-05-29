@@ -27616,17 +27616,6 @@ var require_db = __commonJS((exports, module) => {
   };
 });
 
-// node_modules/mime-db/index.js
-var require_mime_db = __commonJS((exports, module) => {
-  /*!
-   * mime-db
-   * Copyright(c) 2014 Jonathan Ong
-   * Copyright(c) 2015-2022 Douglas Christopher Wilson
-   * MIT Licensed
-   */
-  module.exports = require_db();
-});
-
 // node_modules/mime-types/index.js
 var require_mime_types = __commonJS((exports) => {
   /*!
@@ -27635,7 +27624,7 @@ var require_mime_types = __commonJS((exports) => {
    * Copyright(c) 2015 Douglas Christopher Wilson
    * MIT Licensed
    */
-  var db = require_mime_db();
+  var db = require_db();
   var extname = __require("path").extname;
   var EXTRACT_TYPE_REGEXP = /^\s*([^;\s]*)(?:;|\s|$)/;
   var TEXT_TYPE_REGEXP = /^text\//i;
@@ -28777,7 +28766,7 @@ var require_round = __commonJS((exports, module) => {
 
 // node_modules/math-intrinsics/isNaN.js
 var require_isNaN = __commonJS((exports, module) => {
-  module.exports = Number.isNaN || function isNaN(a) {
+  module.exports = Number.isNaN || function isNaN2(a) {
     return a !== a;
   };
 });
@@ -28911,7 +28900,7 @@ var require_implementation = __commonJS((exports, module) => {
   var toStr = Object.prototype.toString;
   var max = Math.max;
   var funcType = "[object Function]";
-  var concatty = function concatty(a, b2) {
+  var concatty = function concatty2(a, b2) {
     var arr = [];
     for (var i = 0;i < a.length; i += 1) {
       arr[i] = a[i];
@@ -28921,7 +28910,7 @@ var require_implementation = __commonJS((exports, module) => {
     }
     return arr;
   };
-  var slicy = function slicy(arrLike, offset) {
+  var slicy = function slicy2(arrLike, offset) {
     var arr = [];
     for (var i = offset || 0, j2 = 0;i < arrLike.length; i += 1, j2 += 1) {
       arr[j2] = arrLike[i];
@@ -28962,7 +28951,7 @@ var require_implementation = __commonJS((exports, module) => {
     }
     bound = Function("binder", "return function (" + joiny(boundArgs, ",") + "){ return binder.apply(this,arguments); }")(binder);
     if (target.prototype) {
-      var Empty = function Empty() {};
+      var Empty = function Empty2() {};
       Empty.prototype = target.prototype;
       bound.prototype = new Empty;
       Empty.prototype = null;
@@ -29201,7 +29190,7 @@ var require_get_intrinsic = __commonJS((exports, module) => {
     }
   }
   var errorProto;
-  var doEval = function doEval(name) {
+  var doEval = function doEval2(name) {
     var value;
     if (name === "%AsyncFunction%") {
       value = getEvalledConstructor("async function () {}");
@@ -29210,12 +29199,12 @@ var require_get_intrinsic = __commonJS((exports, module) => {
     } else if (name === "%AsyncGeneratorFunction%") {
       value = getEvalledConstructor("async function* () {}");
     } else if (name === "%AsyncGenerator%") {
-      var fn = doEval("%AsyncGeneratorFunction%");
+      var fn = doEval2("%AsyncGeneratorFunction%");
       if (fn) {
         value = fn.prototype;
       }
     } else if (name === "%AsyncIteratorPrototype%") {
-      var gen = doEval("%AsyncGenerator%");
+      var gen = doEval2("%AsyncGenerator%");
       if (gen && getProto) {
         value = getProto(gen.prototype);
       }
@@ -29286,7 +29275,7 @@ var require_get_intrinsic = __commonJS((exports, module) => {
   var $exec = bind.call($call, RegExp.prototype.exec);
   var rePropName = /[^%.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\\]|\\.)*?)\2)\]|(?=(?:\.|\[\])(?:\.|\[\]|%$))/g;
   var reEscapeChar = /\\(\\)?/g;
-  var stringToPath = function stringToPath(string3) {
+  var stringToPath = function stringToPath2(string3) {
     var first = $strSlice(string3, 0, 1);
     var last = $strSlice(string3, -1);
     if (first === "%" && last !== "%") {
@@ -29300,7 +29289,7 @@ var require_get_intrinsic = __commonJS((exports, module) => {
     });
     return result;
   };
-  var getBaseIntrinsic = function getBaseIntrinsic(name, allowMissing) {
+  var getBaseIntrinsic = function getBaseIntrinsic2(name, allowMissing) {
     var intrinsicName = name;
     var alias;
     if (hasOwn(LEGACY_ALIASES, intrinsicName)) {
@@ -29590,7 +29579,7 @@ var require_utils = __commonJS((exports, module) => {
     }
     return array2;
   }();
-  var compactQueue = function compactQueue(queue) {
+  var compactQueue = function compactQueue2(queue) {
     while (queue.length > 1) {
       var item = queue.pop();
       var obj = item.obj[item.prop];
@@ -29605,7 +29594,7 @@ var require_utils = __commonJS((exports, module) => {
       }
     }
   };
-  var arrayToObject = function arrayToObject(source, options) {
+  var arrayToObject = function arrayToObject2(source, options) {
     var obj = options && options.plainObjects ? Object.create(null) : {};
     for (var i = 0;i < source.length; ++i) {
       if (typeof source[i] !== "undefined") {
@@ -29614,7 +29603,7 @@ var require_utils = __commonJS((exports, module) => {
     }
     return obj;
   };
-  var merge2 = function merge(target, source, options) {
+  var merge2 = function merge3(target, source, options) {
     if (!source) {
       return target;
     }
@@ -29642,7 +29631,7 @@ var require_utils = __commonJS((exports, module) => {
         if (has.call(target, i)) {
           var targetItem = target[i];
           if (targetItem && typeof targetItem === "object" && item && typeof item === "object") {
-            target[i] = merge(targetItem, item, options);
+            target[i] = merge3(targetItem, item, options);
           } else {
             target.push(item);
           }
@@ -29655,7 +29644,7 @@ var require_utils = __commonJS((exports, module) => {
     return Object.keys(source).reduce(function(acc, key) {
       var value = source[key];
       if (has.call(acc, key)) {
-        acc[key] = merge(acc[key], value, options);
+        acc[key] = merge3(acc[key], value, options);
       } else {
         acc[key] = value;
       }
@@ -29680,7 +29669,7 @@ var require_utils = __commonJS((exports, module) => {
     }
   };
   var limit = 1024;
-  var encode = function encode(str, defaultEncoder, charset, kind, format) {
+  var encode = function encode2(str, defaultEncoder, charset, kind, format) {
     if (str.length === 0) {
       return str;
     }
@@ -29725,7 +29714,7 @@ var require_utils = __commonJS((exports, module) => {
     }
     return out;
   };
-  var compact = function compact(value) {
+  var compact = function compact2(value) {
     var queue = [{ obj: { o: value }, prop: "o" }];
     var refs = [];
     for (var i = 0;i < queue.length; ++i) {
@@ -29744,19 +29733,19 @@ var require_utils = __commonJS((exports, module) => {
     compactQueue(queue);
     return value;
   };
-  var isRegExp = function isRegExp(obj) {
+  var isRegExp = function isRegExp2(obj) {
     return Object.prototype.toString.call(obj) === "[object RegExp]";
   };
-  var isBuffer = function isBuffer(obj) {
+  var isBuffer = function isBuffer2(obj) {
     if (!obj || typeof obj !== "object") {
       return false;
     }
     return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
   };
-  var combine = function combine(a, b2) {
+  var combine = function combine2(a, b2) {
     return [].concat(a, b2);
   };
-  var maybeMap = function maybeMap(val, fn) {
+  var maybeMap = function maybeMap2(val, fn) {
     if (isArray(val)) {
       var mapped = [];
       for (var i = 0;i < val.length; i += 1) {
@@ -29826,11 +29815,11 @@ var require_stringify = __commonJS((exports, module) => {
     skipNulls: false,
     strictNullHandling: false
   };
-  var isNonNullishPrimitive = function isNonNullishPrimitive(v2) {
+  var isNonNullishPrimitive = function isNonNullishPrimitive2(v2) {
     return typeof v2 === "string" || typeof v2 === "number" || typeof v2 === "boolean" || typeof v2 === "symbol" || typeof v2 === "bigint";
   };
   var sentinel = {};
-  var stringify = function stringify(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
+  var stringify = function stringify2(object2, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, sideChannel) {
     var obj = object2;
     var tmpSc = sideChannel;
     var step = 0;
@@ -29906,11 +29895,11 @@ var require_stringify = __commonJS((exports, module) => {
       sideChannel.set(object2, step);
       var valueSideChannel = getSideChannel();
       valueSideChannel.set(sentinel, sideChannel);
-      pushToArray(values, stringify(value, keyPrefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, generateArrayPrefix === "comma" && encodeValuesOnly && isArray(obj) ? null : encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, valueSideChannel));
+      pushToArray(values, stringify2(value, keyPrefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, generateArrayPrefix === "comma" && encodeValuesOnly && isArray(obj) ? null : encoder, filter, sort, allowDots, serializeDate, format, formatter, encodeValuesOnly, charset, valueSideChannel));
     }
     return values;
   };
-  var normalizeStringifyOptions = function normalizeStringifyOptions(opts) {
+  var normalizeStringifyOptions = function normalizeStringifyOptions2(opts) {
     if (!opts) {
       return defaults;
     }
@@ -30173,7 +30162,7 @@ var require_parse = __commonJS((exports, module) => {
     }
     return parseObject(keys, val, options, valuesParsed);
   };
-  var normalizeParseOptions = function normalizeParseOptions(opts) {
+  var normalizeParseOptions = function normalizeParseOptions2(opts) {
     if (!opts) {
       return defaults;
     }
@@ -30469,7 +30458,7 @@ var require_body_parser = __commonJS((exports, module) => {
     });
     var _urlencoded = exports.urlencoded(opts);
     var _json = exports.json(opts);
-    return function bodyParser(req, res, next) {
+    return function bodyParser2(req, res, next) {
       _json(req, res, function(err) {
         if (err)
           return next(err);
@@ -31864,7 +31853,7 @@ var require_layer = __commonJS((exports, module) => {
     }
   };
   Layer.prototype.match = function match(path) {
-    var match;
+    var match2;
     if (path != null) {
       if (this.regexp.fast_slash) {
         this.params = {};
@@ -31876,21 +31865,21 @@ var require_layer = __commonJS((exports, module) => {
         this.path = path;
         return true;
       }
-      match = this.regexp.exec(path);
+      match2 = this.regexp.exec(path);
     }
-    if (!match) {
+    if (!match2) {
       this.params = undefined;
       this.path = undefined;
       return false;
     }
     this.params = {};
-    this.path = match[0];
+    this.path = match2[0];
     var keys = this.keys;
     var params = this.params;
-    for (var i = 1;i < match.length; i++) {
+    for (var i = 1;i < match2.length; i++) {
       var key = keys[i - 1];
       var prop = key.name;
-      var val = decode_param(match[i]);
+      var val = decode_param(match2[i]);
       if (val !== undefined || !hasOwnProperty.call(params, prop)) {
         params[prop] = val;
       }
@@ -32364,15 +32353,15 @@ var require_router = __commonJS((exports, module) => {
     return this;
   };
   proto.route = function route(path) {
-    var route = new Route(path);
+    var route2 = new Route(path);
     var layer = new Layer(path, {
       sensitive: this.caseSensitive,
       strict: this.strict,
       end: true
-    }, route.dispatch.bind(route));
-    layer.route = route;
+    }, route2.dispatch.bind(route2));
+    layer.route = route2;
     this.stack.push(layer);
-    return route;
+    return route2;
   };
   methods.concat("all").forEach(function(method) {
     proto[method] = function(path) {
@@ -32525,7 +32514,7 @@ var require_query = __commonJS((exports, module) => {
     if (opts !== undefined && opts.allowPrototypes === undefined) {
       opts.allowPrototypes = true;
     }
-    return function query(req, res, next) {
+    return function query2(req, res, next) {
       if (!req.query) {
         var val = parseUrl(req).query;
         req.query = queryparse(val, opts);
@@ -32596,7 +32585,7 @@ var require_view = __commonJS((exports, module) => {
     debug('render "%s"', this.path);
     this.engine(this.path, options, callback);
   };
-  View.prototype.resolve = function resolve(dir, file) {
+  View.prototype.resolve = function resolve2(dir, file) {
     var ext = this.ext;
     var path2 = join(dir, file);
     var stat = tryStat(path2);
@@ -33715,7 +33704,7 @@ var require_send = __commonJS((exports, module) => {
     }
   }
   util3.inherits(SendStream, Stream);
-  SendStream.prototype.etag = deprecate.function(function etag(val) {
+  SendStream.prototype.etag = deprecate.function(function etag2(val) {
     this._etag = Boolean(val);
     debug("etag %s", this._etag);
     return this;
@@ -33727,9 +33716,9 @@ var require_send = __commonJS((exports, module) => {
     return this;
   }, "send.hidden: use dotfiles option");
   SendStream.prototype.index = deprecate.function(function index(paths) {
-    var index = !paths ? [] : normalizeList(paths, "paths argument");
+    var index2 = !paths ? [] : normalizeList(paths, "paths argument");
     debug("index %o", paths);
-    this._index = index;
+    this._index = index2;
     return this;
   }, "send.index: pass index as option");
   SendStream.prototype.root = function root(path2) {
@@ -33745,7 +33734,7 @@ var require_send = __commonJS((exports, module) => {
     debug("max-age %d", this._maxage);
     return this;
   }, "send.maxage: pass maxAge as option");
-  SendStream.prototype.error = function error(status, err) {
+  SendStream.prototype.error = function error2(status, err) {
     if (hasListeners(this, "error")) {
       return this.emit("error", createHttpError(status, err));
     }
@@ -33860,7 +33849,7 @@ var require_send = __commonJS((exports, module) => {
     res.setHeader("Location", loc);
     res.end(doc2);
   };
-  SendStream.prototype.pipe = function pipe(res) {
+  SendStream.prototype.pipe = function pipe2(res) {
     var root = this._root;
     this.res = res;
     var path2 = decode(this.path);
@@ -33918,7 +33907,7 @@ var require_send = __commonJS((exports, module) => {
     this.sendFile(path2);
     return res;
   };
-  SendStream.prototype.send = function send(path2, stat) {
+  SendStream.prototype.send = function send2(path2, stat) {
     var len = stat.size;
     var options = this.options;
     var opts = {};
@@ -34040,18 +34029,18 @@ var require_send = __commonJS((exports, module) => {
   SendStream.prototype.stream = function stream(path2, options) {
     var self = this;
     var res = this.res;
-    var stream = fs.createReadStream(path2, options);
-    this.emit("stream", stream);
-    stream.pipe(res);
+    var stream2 = fs.createReadStream(path2, options);
+    this.emit("stream", stream2);
+    stream2.pipe(res);
     function cleanup() {
-      destroy(stream, true);
+      destroy(stream2, true);
     }
     onFinished(res, cleanup);
-    stream.on("error", function onerror(err) {
+    stream2.on("error", function onerror(err) {
       cleanup();
       self.onStatError(err);
     });
-    stream.on("end", function onend() {
+    stream2.on("end", function onend() {
       self.emit("end");
     });
   };
@@ -34059,14 +34048,14 @@ var require_send = __commonJS((exports, module) => {
     var res = this.res;
     if (res.getHeader("Content-Type"))
       return;
-    var type = mime.lookup(path2);
-    if (!type) {
+    var type2 = mime.lookup(path2);
+    if (!type2) {
       debug("no content-type");
       return;
     }
-    var charset = mime.charsets.lookup(type);
-    debug("content-type %s", type);
-    res.setHeader("Content-Type", type + (charset ? "; charset=" + charset : ""));
+    var charset = mime.charsets.lookup(type2);
+    debug("content-type %s", type2);
+    res.setHeader("Content-Type", type2 + (charset ? "; charset=" + charset : ""));
   };
   SendStream.prototype.setHeader = function setHeader(path2, stat) {
     var res = this.res;
@@ -36094,10 +36083,10 @@ var require_request = __commonJS((exports, module) => {
   };
   req.acceptsLanguage = deprecate.function(req.acceptsLanguages, "req.acceptsLanguage: Use acceptsLanguages instead");
   req.range = function range(size, options) {
-    var range = this.get("Range");
-    if (!range)
+    var range2 = this.get("Range");
+    if (!range2)
       return;
-    return parseRange(size, range, options);
+    return parseRange(size, range2, options);
   };
   req.param = function param(name, defaultValue) {
     var params = this.params || {};
@@ -36151,13 +36140,13 @@ var require_request = __commonJS((exports, module) => {
     if (!hostname2)
       return [];
     var offset = this.app.get("subdomain offset");
-    var subdomains = !isIP(hostname2) ? hostname2.split(".").reverse() : [hostname2];
-    return subdomains.slice(offset);
+    var subdomains2 = !isIP(hostname2) ? hostname2.split(".").reverse() : [hostname2];
+    return subdomains2.slice(offset);
   });
   defineGetter(req, "path", function path() {
     return parse5(this).pathname;
   });
-  defineGetter(req, "hostname", function hostname() {
+  defineGetter(req, "hostname", function hostname2() {
     var trust = this.app.get("trust proxy fn");
     var host = this.get("X-Forwarded-Host");
     if (!host || !trust(this.connection.remoteAddress, 0)) {
@@ -36523,7 +36512,7 @@ var require_response = __commonJS((exports, module) => {
       return "<" + links[rel] + '>; rel="' + rel + '"';
     }).join(", "));
   };
-  res.send = function send(body) {
+  res.send = function send2(body) {
     var chunk = body;
     var encoding;
     var req = this.req;
@@ -36767,7 +36756,7 @@ var require_response = __commonJS((exports, module) => {
     var fullPath = !opts.root ? resolve(path2) : path2;
     return this.sendFile(fullPath, opts, done);
   };
-  res.contentType = res.type = function contentType(type) {
+  res.contentType = res.type = function contentType2(type) {
     var ct = type.indexOf("/") === -1 ? mime.lookup(type) : type;
     return this.set("Content-Type", ct);
   };
@@ -37065,7 +37054,7 @@ var require_serve_static = __commonJS((exports, module) => {
     opts.maxage = opts.maxage || opts.maxAge || 0;
     opts.root = resolve(root);
     var onDirectory = redirect ? createRedirectDirectoryListener() : createNotFoundDirectoryListener();
-    return function serveStatic(req, res, next) {
+    return function serveStatic2(req, res, next) {
       if (req.method !== "GET" && req.method !== "HEAD") {
         if (fallthrough) {
           return next();
@@ -37092,7 +37081,7 @@ var require_serve_static = __commonJS((exports, module) => {
           forwardError = true;
         });
       }
-      stream.on("error", function error(err) {
+      stream.on("error", function error2(err) {
         if (forwardError || !(err.statusCode < 500)) {
           next(err);
           return;
@@ -37221,18 +37210,6 @@ var require_express = __commonJS((exports, module) => {
       configurable: true
     });
   });
-});
-
-// node_modules/express/index.js
-var require_express2 = __commonJS((exports, module) => {
-  /*!
-   * express
-   * Copyright(c) 2009-2013 TJ Holowaychuk
-   * Copyright(c) 2013 Roman Shtylman
-   * Copyright(c) 2014-2015 Douglas Christopher Wilson
-   * MIT Licensed
-   */
-  module.exports = require_express();
 });
 
 // node_modules/zod/dist/esm/v4/mini/parse.js
@@ -46002,7 +45979,7 @@ var require_formats2 = __commonJS((exports) => {
   }
   var TIME = /^(\d\d):(\d\d):(\d\d(?:\.\d+)?)(z|([+-])(\d\d)(?::?(\d\d))?)?$/i;
   function getTime(strictTimeZone) {
-    return function time(str) {
+    return function time3(str) {
       const matches = TIME.exec(str);
       if (!matches)
         return false;
@@ -54127,7 +54104,7 @@ function augmentListTool(def) {
 var FILTER_ANNOTATION = "supports result filtering", FILTER_DESC, CURSOR_DESC, USAGE_PREAMBLE, slotStorage, FETCH_PATCH_FLAG;
 var init__filter_cursor_augment = __esm(() => {
   init_esm();
-  FILTER_DESC = "OData-style filter expression applied server-side. Up to 10 conditions " + "joined with `and` (no `or`, no `not`, no parentheses). Operators: `eq`, " + "`ne`, `gt`, `lt`. String values in single quotes, numerics unquoted. " + "Examples: `active eq 1`, `status eq 'Work Order' and active eq 1`, " + "`total_price gt 1000 and total_price lt 5000`, " + "`create_date gt '2026-01-01' and active eq 1`. " + "Pass the raw expression — do NOT URL-encode. Field names are " + "case-sensitive and must be real fields on the resource. Max value " + "length 255 chars. https://developer.servicem8.com/docs/filtering";
+  FILTER_DESC = "OData-style filter expression applied server-side. Up to 10 conditions " + "joined with `and` (no `or`, no `not`, no parentheses). Operators: `eq`, " + "`ne`, `gt`, `lt`. String values in single quotes, numerics unquoted. " + "Examples: `active eq 1`, `status eq 'Work Order' and active eq 1`, " + "`date gt '2026-01-01' and active eq 1`. " + "Field names are case-sensitive snake_case and MUST appear in the " + "response shape — there is no `create_date`, use `date` (the job/record " + "date) or `edit_date` (last modified). If unsure, probe with " + "`cursor='-1'` and no filter, inspect the field names returned, then " + "filter on a subsequent call. Pass the raw expression — do NOT URL-encode. " + "Max value length 255 chars. https://developer.servicem8.com/docs/filtering";
   CURSOR_DESC = "Pagination cursor. Pass `'-1'` for the first page; each response " + "returns up to 1000 records and a `next_cursor` field in the result. " + "To get the next page, pass that `next_cursor` value here. When " + "`next_cursor` is `null` in the response, you have reached the last " + "page. https://developer.servicem8.com/docs/pagination";
   USAGE_PREAMBLE = `
 #### USAGE
@@ -54136,10 +54113,12 @@ var init__filter_cursor_augment = __esm(() => {
 ` + "For pagination: pass `cursor='-1'` on the first call. The response " + "will contain a `next_cursor` field — pass that value to fetch the " + "next page. When `next_cursor` is `null`, you have the last page.\n\n" + `Filter syntax (OData):
 ` + `  active eq 1
 ` + `  status eq 'Work Order' and active eq 1
-` + `  create_date gt '2026-01-01' and active eq 1
-` + `  total_price gt 1000 and total_price lt 5000
+` + `  date gt '2026-01-01' and active eq 1
+` + `  edit_date gt '2026-05-01' and active eq 1
 
 ` + "Operators: eq, ne, gt, lt. Combine with `and` (max 10 conditions, no " + `or/not, no parens). Strings single-quoted, numerics unquoted.
+
+` + "FIELD DISCOVERY: filter field names must match the snake_case keys in " + "the response records. Common pitfalls: `create_date` does NOT exist — " + "use `date` for the job/record date or `edit_date` for last-modified. " + "If you don't know the schema, do a single probe call with `cursor='-1'` " + "and no filter, then inspect the field names in `records[0]` before " + `filtering on subsequent calls.
 `;
   slotStorage = new AsyncLocalStorage;
   FETCH_PATCH_FLAG = Symbol.for("__sm8_filter_cursor_fetch_patched__");
@@ -87049,7 +87028,7 @@ var init_impl = __esm(() => {
   init_stdio2();
   init_console_logger();
   init_server2();
-  import_express = __toESM(require_express2(), 1);
+  import_express = __toESM(require_express(), 1);
 });
 
 // node_modules/@stricli/core/dist/index.js
@@ -88139,5 +88118,5 @@ export {
   app
 };
 
-//# debugId=23F319A90CD6144764756E2164756E21
+//# debugId=B8ADC589C0F4B9AB64756E2164756E21
 //# sourceMappingURL=mcp-server.js.map

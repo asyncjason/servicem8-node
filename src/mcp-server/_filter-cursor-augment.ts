@@ -36,11 +36,13 @@ const FILTER_DESC =
   "joined with `and` (no `or`, no `not`, no parentheses). Operators: `eq`, " +
   "`ne`, `gt`, `lt`. String values in single quotes, numerics unquoted. " +
   "Examples: `active eq 1`, `status eq 'Work Order' and active eq 1`, " +
-  "`total_price gt 1000 and total_price lt 5000`, " +
-  "`create_date gt '2026-01-01' and active eq 1`. " +
-  "Pass the raw expression — do NOT URL-encode. Field names are " +
-  "case-sensitive and must be real fields on the resource. Max value " +
-  "length 255 chars. https://developer.servicem8.com/docs/filtering";
+  "`date gt '2026-01-01' and active eq 1`. " +
+  "Field names are case-sensitive snake_case and MUST appear in the " +
+  "response shape — there is no `create_date`, use `date` (the job/record " +
+  "date) or `edit_date` (last modified). If unsure, probe with " +
+  "`cursor='-1'` and no filter, inspect the field names returned, then " +
+  "filter on a subsequent call. Pass the raw expression — do NOT URL-encode. " +
+  "Max value length 255 chars. https://developer.servicem8.com/docs/filtering";
 
 const CURSOR_DESC =
   "Pagination cursor. Pass `'-1'` for the first page; each response " +
@@ -60,10 +62,16 @@ const USAGE_PREAMBLE =
   "Filter syntax (OData):\n" +
   "  active eq 1\n" +
   "  status eq 'Work Order' and active eq 1\n" +
-  "  create_date gt '2026-01-01' and active eq 1\n" +
-  "  total_price gt 1000 and total_price lt 5000\n\n" +
+  "  date gt '2026-01-01' and active eq 1\n" +
+  "  edit_date gt '2026-05-01' and active eq 1\n\n" +
   "Operators: eq, ne, gt, lt. Combine with `and` (max 10 conditions, no " +
-  "or/not, no parens). Strings single-quoted, numerics unquoted.\n";
+  "or/not, no parens). Strings single-quoted, numerics unquoted.\n\n" +
+  "FIELD DISCOVERY: filter field names must match the snake_case keys in " +
+  "the response records. Common pitfalls: `create_date` does NOT exist — " +
+  "use `date` for the job/record date or `edit_date` for last-modified. " +
+  "If you don't know the schema, do a single probe call with `cursor='-1'` " +
+  "and no filter, then inspect the field names in `records[0]` before " +
+  "filtering on subsequent calls.\n";
 
 // ──────────────────────────────────────────────────────────────────────────
 // Per-call slot + global fetch patch (idempotent across module re-evals).
