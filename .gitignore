@@ -17,6 +17,8 @@
 /index.*
 /core.*
 # /bin — committed on this fork so `npm install git+…` works without a build step.
+# Map file is 6MB+; don't commit. Symbol info for debug only.
+/bin/*.map
 /cjs
 /esm
 /dist

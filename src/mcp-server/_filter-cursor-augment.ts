@@ -10,72 +10,90 @@
  *
  * Detection rule: list operations carry the literal annotation
  *   "supports result filtering"
- * in their generated description. That's the only set we touch.
+ * in their generated description.
  *
- * Mechanism:
- *   - Augment the ToolDefinition: add optional `filter` + `cursor` Zod args
- *     and prepend a usage preamble to the description.
- *   - Wrap the tool callback with an AsyncLocalStorage frame holding the
- *     args.
- *   - Monkey-patch globalThis.fetch ONCE to: (a) append $filter / cursor to
- *     the outbound URL, (b) capture the response's x-next-cursor header.
- *   - On return, re-shape the tool result body into
- *     { records: <original>, next_cursor: <string|null> } so the agent can
- *     paginate without seeing the response headers.
+ * On a match we replace the description with a compact, markdown block
+ * that includes the actual snake_case filterable field set for that
+ * resource (extracted at module load from `<Resource>$inboundSchema`,
+ * which Speakeasy declares with the wire-format keys). The LLM no longer
+ * has to guess between camelCase TS-side names and snake_case wire-side
+ * names.
  */
 
 import { AsyncLocalStorage } from "node:async_hooks";
 import { z, type ZodRawShape } from "zod/v3";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { ToolDefinition } from "./tools.js";
+import { FILTER_FIELD_MAP } from "./_filter-field-map.js";
 
 const FILTER_ANNOTATION = "supports result filtering";
 
-const FILTER_DESC =
-  "OData-style filter expression applied server-side. Up to 10 conditions " +
-  "joined with `and` (no `or`, no `not`, no parentheses). Operators: `eq`, " +
-  "`ne`, `gt`, `lt`. String values in single quotes, numerics unquoted. " +
-  "Examples: `active eq 1`, `status eq 'Work Order' and active eq 1`, " +
-  "`date gt '2026-01-01' and active eq 1`. " +
-  "Field names are case-sensitive snake_case and MUST appear in the " +
-  "response shape — there is no `create_date`, use `date` (the job/record " +
-  "date) or `edit_date` (last modified). If unsure, probe with " +
-  "`cursor='-1'` and no filter, inspect the field names returned, then " +
-  "filter on a subsequent call. Pass the raw expression — do NOT URL-encode. " +
-  "Max value length 255 chars. https://developer.servicem8.com/docs/filtering";
+// Resource → snake_case field list, generated at build time by
+// _gen-filter-fields.mjs from the SDK's `<Resource>$inboundSchema` declarations
+// (those are declared with the wire-format snake_case keys ServiceM8 expects
+// in `$filter` URLs). Runtime Zod reflection didn't survive the Bun bundler's
+// renames, so we ship a static map instead.
+function fieldsFor(resource: string): readonly string[] | undefined {
+  return FILTER_FIELD_MAP[resource];
+}
 
-const CURSOR_DESC =
-  "Pagination cursor. Pass `'-1'` for the first page; each response " +
-  "returns up to 1000 records and a `next_cursor` field in the result. " +
-  "To get the next page, pass that `next_cursor` value here. When " +
-  "`next_cursor` is `null` in the response, you have reached the last " +
-  "page. https://developer.servicem8.com/docs/pagination";
+// ──────────────────────────────────────────────────────────────────────────
+// Tool name → resource name. Tool pattern is `<plural-kebab>-list-<plural-kebab>`.
+// ──────────────────────────────────────────────────────────────────────────
 
-const USAGE_PREAMBLE =
-  "\n#### USAGE\n" +
-  "ALWAYS use `filter` to narrow results — never list a whole resource " +
-  "just to scan client-side. The filter is applied server-side and " +
-  "avoids pulling thousands of records.\n\n" +
-  "For pagination: pass `cursor='-1'` on the first call. The response " +
-  "will contain a `next_cursor` field — pass that value to fetch the " +
-  "next page. When `next_cursor` is `null`, you have the last page.\n\n" +
-  "Filter syntax (OData):\n" +
-  "  active eq 1\n" +
-  "  status eq 'Work Order' and active eq 1\n" +
-  "  date gt '2026-01-01' and active eq 1\n" +
-  "  edit_date gt '2026-05-01' and active eq 1\n\n" +
-  "Operators: eq, ne, gt, lt. Combine with `and` (max 10 conditions, no " +
-  "or/not, no parens). Strings single-quoted, numerics unquoted.\n\n" +
-  "FIELD DISCOVERY: filter field names must match the snake_case keys in " +
-  "the response records. Common pitfalls: `create_date` does NOT exist — " +
-  "use `date` for the job/record date or `edit_date` for last-modified. " +
-  "If you don't know the schema, do a single probe call with `cursor='-1'` " +
-  "and no filter, then inspect the field names in `records[0]` before " +
-  "filtering on subsequent calls.\n";
+function singularize(s: string): string {
+  if (s.endsWith("ies")) return s.slice(0, -3) + "y";
+  if (s.endsWith("ses") || s.endsWith("xes")) return s.slice(0, -2);
+  if (s.endsWith("s") && !s.endsWith("ss")) return s.slice(0, -1);
+  return s;
+}
+
+function pascalCase(s: string): string {
+  return s
+    .split("-")
+    .map((p) => (p ? p[0]!.toUpperCase() + p.slice(1) : ""))
+    .join("");
+}
+
+function resourceFromToolName(name: string): string {
+  const idx = name.indexOf("-list-");
+  const plural = idx >= 0 ? name.slice(idx + "-list-".length) : name;
+  return pascalCase(singularize(plural));
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Compact description builder. Strips Speakeasy's verbose trailing
+// `#### Filtering / #### OAuth Scope / #### Record UUID` boilerplate and
+// emits a tight markdown block with the actual snake_case field list.
+// ──────────────────────────────────────────────────────────────────────────
+
+function buildDescription(toolName: string, originalDesc: string): string {
+  const resource = resourceFromToolName(toolName);
+  const fields = fieldsFor(resource);
+
+  // Keep only the first non-empty line of the original (the "List all X" hint).
+  const firstLine = (originalDesc.split("\n").find((l) => l.trim()) || "").trim();
+  const summary = firstLine || `List ${resource} records.`;
+
+  const fieldLine = fields && fields.length
+    ? `Fields (snake_case, verbatim): ${fields.map((f) => `\`${f}\``).join(", ")}.`
+    : "Fields: probe with `cursor='-1'` and no filter, then inspect snake_case keys in `records[0]`.";
+
+  return [
+    summary,
+    "",
+    "`filter` (OData, raw — do NOT url-encode): operators `eq`/`ne`/`gt`/`lt` joined with `and` (max 10, no `or`/`not`/parens). Strings single-quoted, numbers unquoted.",
+    fieldLine,
+    "Examples: `active eq 1`, `date gt '2026-01-01' and active eq 1`.",
+    "",
+    "`cursor`: pass `'-1'` for first page; subsequent calls pass `next_cursor` from the previous response. `null` = last page.",
+  ].join("\n");
+}
 
 // ──────────────────────────────────────────────────────────────────────────
 // Per-call slot + global fetch patch (idempotent across module re-evals).
 // ──────────────────────────────────────────────────────────────────────────
+
 type Slot = { filter?: string; cursor?: string; nextCursor?: string };
 const slotStorage = new AsyncLocalStorage<Slot>();
 
@@ -107,7 +125,6 @@ function patchFetchOnce(): void {
       if (slot.cursor && !url.searchParams.has("cursor")) {
         url.searchParams.set("cursor", slot.cursor);
       }
-      // Preserve Request-shape inputs so headers/body survive.
       actualInput =
         input instanceof Request
           ? new Request(url.toString(), input)
@@ -127,7 +144,17 @@ function patchFetchOnce(): void {
 // ──────────────────────────────────────────────────────────────────────────
 // The augmenter — called once per ToolDefinition at registration time.
 // ──────────────────────────────────────────────────────────────────────────
+
 type AnyToolDefinition = ToolDefinition<ZodRawShape | undefined>;
+
+const FILTER_DESC =
+  "OData expression. Operators `eq`/`ne`/`gt`/`lt` joined with `and`. " +
+  "Strings single-quoted. See the tool description for the snake_case " +
+  "field list — do not guess field names.";
+
+const CURSOR_DESC =
+  "Pagination cursor. `'-1'` for first page; subsequent calls pass " +
+  "`next_cursor` from the previous response. `null` = last page.";
 
 export function augmentListTool<A extends ZodRawShape | undefined>(
   def: ToolDefinition<A>,
@@ -147,7 +174,7 @@ export function augmentListTool<A extends ZodRawShape | undefined>(
 
   const wrapped: ToolDefinition<ZodRawShape> = {
     ...(def as AnyToolDefinition),
-    description: USAGE_PREAMBLE + (def.description ?? ""),
+    description: buildDescription(def.name, def.description ?? ""),
     args: augmentedArgs,
     tool: async (sdk, args, ctx) => {
       const a = (args ?? {}) as Record<string, unknown>;
@@ -161,14 +188,11 @@ export function augmentListTool<A extends ZodRawShape | undefined>(
       void _f; void _c;
 
       const result: CallToolResult = await slotStorage.run(slot, () =>
-        // The original tool may have had its own args (rare for list ops) or
-        // none at all; pass whatever survives stripping.
         Promise.resolve(originalTool(sdk, rest as never, ctx)),
       );
 
-      // Always wrap list results as { records, next_cursor } so the agent has
-      // a stable shape and can paginate. Only wrap if the result is a single
-      // text content block carrying JSON.
+      // Wrap list results as { records, next_cursor } so the agent has a
+      // stable shape and can paginate.
       if (
         !result.isError
         && Array.isArray(result.content)

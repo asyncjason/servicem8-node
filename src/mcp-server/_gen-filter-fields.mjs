@@ -1,0 +1,146 @@
+#!/usr/bin/env node
+/*
+ * Build-time generator. Scans every `<resource>.ts` in src/models/components/
+ * and extracts the snake_case field names declared in the resource's
+ * `<Resource>$inboundSchema = z.object({ ... })` block. Emits a typed map
+ * at src/mcp-server/_filter-field-map.ts that the augmenter imports.
+ *
+ * Runs at build time only (not in the published bundle's runtime), so the
+ * augmenter never has to walk Zod internals at runtime — which both
+ * matches the user's "generate it ahead of time" preference and dodges
+ * any tree-shaking / bundler-rename issues with dynamic schema lookups.
+ *
+ * Run via: node src/mcp-server/_gen-filter-fields.mjs
+ * Wired from package.json build:mcp.
+ */
+
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const here = dirname(fileURLToPath(import.meta.url));
+const componentsDir = join(here, "..", "models", "components");
+const outFile = join(here, "_filter-field-map.ts");
+
+const TS_FILE = /\.ts$/;
+
+/**
+ * Find every `export const <Resource>$inboundSchema...= z.object({ ... })`
+ * block in the file. Returns { resourceName -> [fieldName, ...] } for each.
+ *
+ * The `<Resource>` we want is the read-shape one (e.g. `JobAllocation`, not
+ * `JobAllocationCreate`) — but both have snake_case zod object keys in their
+ * inbound schemas (they describe the same wire format from different sides).
+ * For filter discovery either is fine.
+ */
+function extractFromFile(src) {
+  const out = {};
+  // Split the file into per-`export const` statement chunks. Each chunk
+  // contains everything from one `export const X = ...` to the start of the
+  // next. Scanning chunks one at a time means our lazy regex can never
+  // slurp content from a different declaration further down.
+  const headerRe = /(?:^|\n)export\s+const\s+/g;
+  /** @type {number[]} */
+  const starts = [];
+  let h;
+  while ((h = headerRe.exec(src)) !== null) starts.push(h.index + h[0].indexOf("export"));
+  for (let s = 0; s < starts.length; s++) {
+    const chunk = src.slice(starts[s], starts[s + 1] ?? src.length);
+    // Within this chunk: match the name + the FIRST `z.object({` (or none).
+    const nameMatch = /^export\s+const\s+([A-Z][A-Za-z0-9_]*)\$inboundSchema/.exec(chunk);
+    if (!nameMatch) continue;
+    const name = nameMatch[1];
+    const objHead = /=\s*z\s*\.\s*object\s*\(\s*\{/.exec(chunk);
+    if (!objHead) continue;
+    const objStart = objHead.index + objHead[0].length;
+    // Brace-walk from objStart until the matching `}` closes.
+    let depth = 1;
+    let i = objStart;
+    while (i < chunk.length && depth > 0) {
+      const ch = chunk[i];
+      if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+      i++;
+      if (depth === 0) break;
+    }
+    const body = chunk.slice(objStart, i - 1);
+    const keys = extractObjectKeys(body);
+    const snake = keys.filter((k) => /^[a-z][a-z0-9_]*$/.test(k));
+    if (snake.length) {
+      if (!out[name] || out[name].length < snake.length) out[name] = snake;
+    }
+  }
+  return out;
+}
+
+/**
+ * Walk a z.object({...}) body and pull out the top-level keys (those at
+ * brace depth 0, before the `:`). Skips keys inside nested braces / parens.
+ */
+function extractObjectKeys(body) {
+  const keys = [];
+  let depth = 0;
+  let parenDepth = 0;
+  let i = 0;
+  // Scan for top-level `key:` tokens.
+  while (i < body.length) {
+    const ch = body[i];
+    if (ch === "{" || ch === "[") depth++;
+    else if (ch === "}" || ch === "]") depth--;
+    else if (ch === "(") parenDepth++;
+    else if (ch === ")") parenDepth--;
+    else if (depth === 0 && parenDepth === 0) {
+      // Match either bare `key:` or quoted `"key":` / `'key':` at this level,
+      // making sure it's followed by `:` and not `::` (TS generics) or `?:`.
+      const rest = body.slice(i);
+      const bare = /^([A-Za-z_][A-Za-z0-9_]*)\s*:/.exec(rest);
+      const quoted = /^["']([A-Za-z_][A-Za-z0-9_]*)["']\s*:/.exec(rest);
+      const hit = bare || quoted;
+      if (hit) {
+        keys.push(hit[1]);
+        i += hit[0].length;
+        continue;
+      }
+    }
+    i++;
+  }
+  return keys;
+}
+
+function main() {
+  const files = readdirSync(componentsDir).filter((f) => TS_FILE.test(f));
+  /** @type {Record<string, string[]>} */
+  const map = {};
+  for (const f of files) {
+    const src = readFileSync(join(componentsDir, f), "utf8");
+    const local = extractFromFile(src);
+    for (const [name, fields] of Object.entries(local)) {
+      // Don't let `<Resource>Create` overwrite the canonical `<Resource>`.
+      const canonical = name.endsWith("Create") ? name.slice(0, -"Create".length) : name;
+      if (!map[canonical] || map[canonical].length < fields.length) {
+        map[canonical] = fields;
+      }
+    }
+  }
+
+  const entries = Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
+  const lines = [
+    "/*",
+    " * Auto-generated by _gen-filter-fields.mjs. DO NOT EDIT BY HAND.",
+    " * Map of <Resource> → snake_case field names from the SDK's",
+    " * <Resource>$inboundSchema declarations. Used by _filter-cursor-augment.ts",
+    " * to inject the filterable field list into each list tool's description.",
+    " */",
+    "",
+    "export const FILTER_FIELD_MAP: Readonly<Record<string, readonly string[]>> = {",
+    ...entries.map(([k, v]) => `  ${k}: [${v.map((f) => `"${f}"`).join(", ")}],`),
+    "} as const;",
+    "",
+  ];
+  writeFileSync(outFile, lines.join("\n"));
+  console.log(
+    `[gen-filter-fields] wrote ${entries.length} resources → ${outFile}`,
+  );
+}
+
+main();

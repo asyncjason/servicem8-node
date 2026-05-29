@@ -54028,8 +54028,127 @@ function createRegisterResourceTemplate(logger, server, sdk, allowedScopes) {
 }
 var init_resources = () => {};
 
+// src/mcp-server/_filter-field-map.ts
+var FILTER_FIELD_MAP;
+var init__filter_field_map = __esm(() => {
+  FILTER_FIELD_MAP = {
+    AddNoteRequest: ["note"],
+    AllocationWindow: ["name", "start_time", "end_time", "sort_priority", "uuid", "active", "edit_date"],
+    ArchiveRequest: ["archived", "reason"],
+    Asset: ["uuid", "active", "edit_date", "company_uuid", "asset_code", "asset_type_uuid", "name", "lat", "lng", "geo_timestamp", "altitude", "field_data"],
+    AssetCreateFieldDatum: ["uuid"],
+    AssetFieldDatum: ["uuid"],
+    AssetType: ["uuid", "active", "edit_date", "name"],
+    AssetTypeField: ["uuid", "active", "edit_date", "asset_type_uuid", "name", "field_data", "sort_order"],
+    AssetTypeFieldCreateFieldData: ["mandatory", "choices"],
+    AssetTypeFieldFieldData: ["mandatory", "choices"],
+    Attachment: ["related_object", "related_object_uuid", "attachment_name", "file_type", "attachment_source", "tags", "lng", "lat", "photo_width", "photo_height", "extracted_info", "is_favourite", "class_name", "metadata", "uuid", "active", "edit_date", "created_by_staff_uuid", "timestamp"],
+    AttachToJobRequest: ["job_uuid"],
+    AttachToJobResponse: ["success", "job", "message"],
+    AttachToJobResponseJob: ["uuid", "id", "location"],
+    Badge: ["uuid", "active", "edit_date", "name", "automatically_allocated", "file_name", "regarding_form_uuid", "regarding_asset_type_uuid"],
+    Category: ["name", "colour", "uuid", "active", "edit_date"],
+    Company: ["name", "abn_number", "address", "billing_address", "is_individual", "parent_company_uuid", "uuid", "active", "edit_date", "website", "address_street", "address_city", "address_state", "address_postcode", "address_country", "fax_number", "badges", "tax_rate_uuid", "billing_attention", "payment_terms"],
+    CompanyContact: ["company_uuid", "first", "last", "phone", "mobile", "email", "type", "is_primary_contact", "uuid", "active", "edit_date"],
+    ConvertToJobRequest: ["template_uuid", "note"],
+    ConvertToJobResponse: ["success", "job", "message"],
+    ConvertToJobResponseJob: ["uuid", "id", "job_number", "location"],
+    CreateInboxMessageRequest: ["subject", "message_text", "from_name", "from_email", "json_data", "regarding_company_uuid"],
+    DocumentTemplate: ["uuid", "active", "edit_date", "template_type", "related_object", "name"],
+    EmailTemplate: ["name", "subject", "message", "uuid", "active", "edit_date"],
+    EmbeddingSearchResponse: ["results", "query", "count"],
+    EmbeddingSearchResult: ["uuid", "type", "title", "description", "status", "similarity_score", "matched_content"],
+    Feedback: ["timestamp", "related_object", "related_object_uuid", "rating", "comment", "uuid", "active", "edit_date"],
+    Form: ["name", "document_template_uuid", "can_be_used_independently", "badge_mandatory_state", "template_fields", "uuid", "active", "edit_date", "badge_name"],
+    FormCreateTemplateField: ["name", "value"],
+    FormField: ["form_uuid", "name", "field_data_json", "sort_order", "uuid", "active", "edit_date"],
+    FormResponse: ["form_uuid", "staff_uuid", "regarding_object", "regarding_object_uuid", "field_data", "timestamp", "form_by_staff_uuid", "document_attachment_uuid", "asset_uuid", "uuid", "active", "edit_date"],
+    FormTemplateField: ["name", "value"],
+    InboxMessage: ["uuid", "active", "edit_date", "timestamp", "read_timestamp", "last_reply_timestamp", "snooze_until_timestamp", "read_by_staff_uuid", "from_name", "from_email", "to_email", "subject", "message_text", "message_html", "is_archived", "archived_timestamp", "archived_by_staff_uuid", "regarding_company_uuid", "converted_to_job_uuid", "job_template_uuid", "message_type"],
+    InboxMessageDetail: ["uuid", "active", "edit_date", "timestamp", "read_timestamp", "last_reply_timestamp", "snooze_until_timestamp", "read_by_staff_uuid", "from_name", "from_email", "to_email", "subject", "message_text", "message_html", "is_archived", "archived_timestamp", "archived_by_staff_uuid", "regarding_company_uuid", "converted_to_job_uuid", "job_template_uuid", "message_type"],
+    InboxMessagesResponse: ["messages", "pagination"],
+    Job: ["created_by_staff_uuid", "date", "company_uuid", "billing_address", "status", "lng", "lat", "payment_date", "payment_actioned_by_uuid", "payment_method", "payment_amount", "category_uuid", "payment_note", "geo_is_valid", "purchase_order_number", "invoice_sent", "invoice_sent_stamp", "ready_to_invoice", "ready_to_invoice_stamp", "geo_country", "geo_postcode", "geo_state", "geo_city", "geo_street", "geo_number", "queue_uuid", "queue_expiry_date", "queue_assigned_staff_uuid", "badges", "quote_date", "quote_sent", "quote_sent_stamp", "work_order_date", "active_network_request_uuid", "related_knowledge_articles", "uuid", "active", "edit_date", "job_address", "job_description", "work_done_description", "generated_job_id", "total_invoice_amount", "payment_processed", "payment_processed_stamp", "payment_received", "payment_received_stamp", "completion_date", "completion_actioned_by_uuid", "unsuccessful_date", "job_is_scheduled_until_stamp"],
+    JobActivity: ["job_uuid", "staff_uuid", "start_date", "end_date", "activity_was_scheduled", "activity_was_recorded", "activity_was_automated", "has_been_opened", "has_been_opened_timestamp", "travel_time_in_seconds", "travel_distance_in_meters", "allocated_by_staff_uuid", "allocated_timestamp", "material_uuid", "uuid", "active", "edit_date", "edit_by_staff_uuid"],
+    JobAllocation: ["job_uuid", "queue_uuid", "staff_uuid", "allocation_date", "allocation_window_uuid", "allocated_by_staff_uuid", "allocated_timestamp", "expiry_timestamp", "read_timestamp", "completion_timestamp", "estimated_duration", "revised_duration", "sort_priority", "requires_acceptance", "acceptance_status", "acceptance_timestamp", "uuid", "active", "edit_date"],
+    JobChecklist: ["uuid", "active", "edit_date", "job_uuid", "name", "section_name", "item_type", "sort_order", "completed_timestamp", "completed_by_staff_uuid", "completed_during_checkin_uuid", "reminder_type", "reminder_data", "regarding_object", "regarding_object_uuid", "fulfilled_by_object_name", "fulfilled_by_object_uuid", "assigned_to_staff_uuids", "is_locked", "assigned_timestamp", "assigned_by_staff_uuid"],
+    JobChecklistCreateRelativeDateTime: ["unit", "quantity"],
+    JobChecklistRelativeDateTime: ["unit", "quantity"],
+    JobContact: ["job_uuid", "first", "last", "phone", "mobile", "email", "type", "is_primary_contact", "uuid", "active", "edit_date"],
+    JobData: ["contact_first", "contact_last", "company_name", "email", "mobile", "phone_1", "phone_2", "billing_contact_first", "billing_contact_last", "billing_email", "billing_mobile", "billing_attention", "job_description", "job_address", "billing_address", "work_done_description"],
+    JobMaterial: ["job_uuid", "material_uuid", "name", "quantity", "price", "displayed_amount", "displayed_amount_is_tax_inclusive", "tax_rate_uuid", "sort_order", "cost", "displayed_cost", "uuid", "active", "edit_date", "job_material_bundle_uuid"],
+    JobMaterialBundle: ["uuid", "active", "edit_date", "item_number", "name", "quantity", "sort_order", "material_bundle_uuid", "job_uuid"],
+    JobPayment: ["job_uuid", "actioned_by_uuid", "timestamp", "amount", "method", "note", "attachment_uuid", "uuid", "active", "edit_date", "is_deposit"],
+    JobTemplate: ["uuid", "active", "edit_date", "name"],
+    JobTemplateOverrides: ["job_description", "company_uuid", "company_name", "job_address"],
+    KnowledgeArticle: ["uuid", "active", "edit_date", "name", "content", "article_type", "tags", "relationships"],
+    KnowledgeArticleCreateRelationship: ["object_name", "object_uuid", "object_description", "create_date"],
+    KnowledgeArticleRelationship: ["object_name", "object_uuid", "object_description", "create_date"],
+    Location: ["name", "line1", "line2", "line3", "city", "country", "post_code", "phone_1", "state", "lng", "lat", "uuid", "active", "edit_date"],
+    Material: ["name", "item_number", "price", "cost", "quantity_in_stock", "price_includes_taxes", "barcode", "item_is_inventoried", "uuid", "active", "edit_date", "item_description", "use_description_for_invoicing", "tax_rate_uuid"],
+    MaterialBundle: ["uuid", "active", "edit_date", "item_number", "name", "material_list"],
+    MaterialBundleCreateMaterialList: ["uuid", "quantity", "sort_order"],
+    MaterialBundleMaterialList: ["uuid", "quantity", "sort_order"],
+    Note: ["uuid", "active", "edit_date", "related_object", "related_object_uuid", "note", "action_required", "action_completed_by_staff_uuid", "edit_by_staff_uuid", "create_date"],
+    ObjectSearchResponse: ["results", "query", "count"],
+    Pagination: ["offset", "limit", "total", "has_more"],
+    Queue: ["uuid", "active", "edit_date", "name", "default_timeframe", "subscribed_staff", "requires_assignment"],
+    Result: ["message"],
+    SearchResponse: ["results", "query", "count"],
+    SearchResult: ["uuid", "type", "title", "highlights"],
+    Security: ["oauth2"],
+    SecurityRole: ["name", "role_description", "uuid", "active", "edit_date"],
+    SmsTemplate: ["name", "message", "uuid", "active", "edit_date"],
+    SnoozeRequest: ["snooze_until", "note"],
+    Staff: ["first", "last", "email", "mobile", "lng", "lat", "geo_timestamp", "job_title", "navigating_to_job_uuid", "navigating_timestamp", "navigating_expiry_timestamp", "color", "custom_icon_url", "status_message", "status_message_timestamp", "hide_from_schedule", "uuid", "active", "edit_date", "can_receive_push_notification", "security_role_uuid", "labour_material_uuid"],
+    StaffMessage: ["from_staff_uuid", "to_staff_uuid", "sent_timestamp", "delivered_timestamp", "read_timestamp", "message", "regarding_job_uuid", "uuid", "active", "edit_date", "attached_json"],
+    SuccessResponse: ["success", "message"],
+    Supplier: ["uuid", "active", "edit_date", "name", "business_number", "address", "email", "phone", "account_number", "lng", "lat", "geo_is_valid", "geo_country", "geo_postcode", "geo_state", "geo_city", "geo_street", "geo_number"],
+    Task: ["due_date", "task_details", "name", "related_object", "related_object_uuid", "task_complete", "completed_timestamp", "completed_by_staff_uuid", "assigned_to_staff_uuid", "lng", "lat", "uuid", "active", "edit_date", "created_by_staff_uuid", "create_date"],
+    TaxRate: ["name", "amount", "is_default_tax_rate", "uuid", "active", "edit_date"],
+    Vendor: ["business_number", "email", "email_accounts", "billing_address", "accepted_payment_methods", "default_region", "currency", "opening_time_monday", "closing_time_monday", "opening_time_tuesday", "closing_time_tuesday", "opening_time_wednesday", "closing_time_wednesday", "opening_time_thursday", "closing_time_thursday", "opening_time_friday", "closing_time_friday", "opening_time_saturday", "closing_time_saturday", "opening_time_sunday", "closing_time_sunday", "timezone_name", "invoice_terms", "job_default_status", "uuid", "active", "edit_date", "name", "abn_number", "website"]
+  };
+});
+
 // src/mcp-server/_filter-cursor-augment.ts
 import { AsyncLocalStorage } from "node:async_hooks";
+function fieldsFor(resource) {
+  return FILTER_FIELD_MAP[resource];
+}
+function singularize(s) {
+  if (s.endsWith("ies"))
+    return s.slice(0, -3) + "y";
+  if (s.endsWith("ses") || s.endsWith("xes"))
+    return s.slice(0, -2);
+  if (s.endsWith("s") && !s.endsWith("ss"))
+    return s.slice(0, -1);
+  return s;
+}
+function pascalCase(s) {
+  return s.split("-").map((p) => p ? p[0].toUpperCase() + p.slice(1) : "").join("");
+}
+function resourceFromToolName(name) {
+  const idx = name.indexOf("-list-");
+  const plural = idx >= 0 ? name.slice(idx + "-list-".length) : name;
+  return pascalCase(singularize(plural));
+}
+function buildDescription(toolName, originalDesc) {
+  const resource = resourceFromToolName(toolName);
+  const fields = fieldsFor(resource);
+  const firstLine = (originalDesc.split(`
+`).find((l) => l.trim()) || "").trim();
+  const summary = firstLine || `List ${resource} records.`;
+  const fieldLine = fields && fields.length ? `Fields (snake_case, verbatim): ${fields.map((f) => `\`${f}\``).join(", ")}.` : "Fields: probe with `cursor='-1'` and no filter, then inspect snake_case keys in `records[0]`.";
+  return [
+    summary,
+    "",
+    "`filter` (OData, raw — do NOT url-encode): operators `eq`/`ne`/`gt`/`lt` joined with `and` (max 10, no `or`/`not`/parens). Strings single-quoted, numbers unquoted.",
+    fieldLine,
+    "Examples: `active eq 1`, `date gt '2026-01-01' and active eq 1`.",
+    "",
+    "`cursor`: pass `'-1'` for first page; subsequent calls pass `next_cursor` from the previous response. `null` = last page."
+  ].join(`
+`);
+}
 function patchFetchOnce() {
   const g = globalThis;
   if (g[FETCH_PATCH_FLAG])
@@ -54072,7 +54191,7 @@ function augmentListTool(def) {
   const originalTool = def.tool;
   const wrapped = {
     ...def,
-    description: USAGE_PREAMBLE + (def.description ?? ""),
+    description: buildDescription(def.name, def.description ?? ""),
     args: augmentedArgs,
     tool: async (sdk, args, ctx) => {
       const a = args ?? {};
@@ -54101,27 +54220,14 @@ function augmentListTool(def) {
   };
   return wrapped;
 }
-var FILTER_ANNOTATION = "supports result filtering", FILTER_DESC, CURSOR_DESC, USAGE_PREAMBLE, slotStorage, FETCH_PATCH_FLAG;
+var FILTER_ANNOTATION = "supports result filtering", slotStorage, FETCH_PATCH_FLAG, FILTER_DESC, CURSOR_DESC;
 var init__filter_cursor_augment = __esm(() => {
   init_esm();
-  FILTER_DESC = "OData-style filter expression applied server-side. Up to 10 conditions " + "joined with `and` (no `or`, no `not`, no parentheses). Operators: `eq`, " + "`ne`, `gt`, `lt`. String values in single quotes, numerics unquoted. " + "Examples: `active eq 1`, `status eq 'Work Order' and active eq 1`, " + "`date gt '2026-01-01' and active eq 1`. " + "Field names are case-sensitive snake_case and MUST appear in the " + "response shape — there is no `create_date`, use `date` (the job/record " + "date) or `edit_date` (last modified). If unsure, probe with " + "`cursor='-1'` and no filter, inspect the field names returned, then " + "filter on a subsequent call. Pass the raw expression — do NOT URL-encode. " + "Max value length 255 chars. https://developer.servicem8.com/docs/filtering";
-  CURSOR_DESC = "Pagination cursor. Pass `'-1'` for the first page; each response " + "returns up to 1000 records and a `next_cursor` field in the result. " + "To get the next page, pass that `next_cursor` value here. When " + "`next_cursor` is `null` in the response, you have reached the last " + "page. https://developer.servicem8.com/docs/pagination";
-  USAGE_PREAMBLE = `
-#### USAGE
-` + "ALWAYS use `filter` to narrow results — never list a whole resource " + "just to scan client-side. The filter is applied server-side and " + `avoids pulling thousands of records.
-
-` + "For pagination: pass `cursor='-1'` on the first call. The response " + "will contain a `next_cursor` field — pass that value to fetch the " + "next page. When `next_cursor` is `null`, you have the last page.\n\n" + `Filter syntax (OData):
-` + `  active eq 1
-` + `  status eq 'Work Order' and active eq 1
-` + `  date gt '2026-01-01' and active eq 1
-` + `  edit_date gt '2026-05-01' and active eq 1
-
-` + "Operators: eq, ne, gt, lt. Combine with `and` (max 10 conditions, no " + `or/not, no parens). Strings single-quoted, numerics unquoted.
-
-` + "FIELD DISCOVERY: filter field names must match the snake_case keys in " + "the response records. Common pitfalls: `create_date` does NOT exist — " + "use `date` for the job/record date or `edit_date` for last-modified. " + "If you don't know the schema, do a single probe call with `cursor='-1'` " + "and no filter, then inspect the field names in `records[0]` before " + `filtering on subsequent calls.
-`;
+  init__filter_field_map();
   slotStorage = new AsyncLocalStorage;
   FETCH_PATCH_FLAG = Symbol.for("__sm8_filter_cursor_fetch_patched__");
+  FILTER_DESC = "OData expression. Operators `eq`/`ne`/`gt`/`lt` joined with `and`. " + "Strings single-quoted. See the tool description for the snake_case " + "field list — do not guess field names.";
+  CURSOR_DESC = "Pagination cursor. `'-1'` for first page; subsequent calls pass " + "`next_cursor` from the previous response. `null` = last page.";
 });
 
 // src/mcp-server/tools.ts
@@ -88118,5 +88224,5 @@ export {
   app
 };
 
-//# debugId=B8ADC589C0F4B9AB64756E2164756E21
+//# debugId=FD5CF657907E97A364756E2164756E21
 //# sourceMappingURL=mcp-server.js.map
